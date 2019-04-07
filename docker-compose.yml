@@ -1,0 +1,36 @@
+version: '3.2'
+
+services:
+  db:
+    image: postgres
+    container_name: travelynx-db
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: travelynx
+      POSTGRES_USER: travelynx
+  web:
+    build: .
+    environment:
+        - TRAVELYNX_DB_NAME=travelynx
+        - TRAVELYNX_DB_HOST=db
+        - TRAVELYNX_DB_PORT=5432
+        - TRAVELYNX_DB_USER=travelynx
+        - TRAVELYNX_DB_PASSWORD=${DB_PASSWORD}
+        - TRAVELYNX_WORKERS=2
+        - TRAVELYNX_SECRETS=${SECRETS}
+#        - TRAVELYNX_LISTEN=http://web:8093
+
+    container_name: travelynx
+    volumes:
+      - type: bind
+        source: ./ssmtp.conf
+        target: /etc/ssmtp/ssmtp.conf
+        volume:
+          read_only: true
+    restart: always
+    ports:
+      - "8080:8080"
+    depends_on:
+      - "db"
+    command: ["sh", "-c", "sleep 10 && perl index.pl database migrate && perl index.pl daemon -m production -l http://*:8080"]

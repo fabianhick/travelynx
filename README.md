@@ -102,3 +102,13 @@ If you use the checkout link again, travelynx will perform a force checkout: it
 will log that you have left the train at the specified station, but omit
 arrival time, delay, and other real-time data. At the moment, this data cannot
 be specified manually.
+
+## Docker-Compose
+You can also run travelynx using the Docker image or docker-compose (which also includes a postgres instance).
+
+Using docker-compose you should first configure your secret and the DB-passwort in the `.env`-file.
+In order to be able to send emails you should also configure sSMTP using the `ssmtp.conf`-file.
+After that you can start travelynx simply by running the following command:
+`docker-compose up -d`
+
+It should then be reachable on Port 8080.

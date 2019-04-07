@@ -78,32 +78,32 @@ sub run {
 
 	my $dbh = $self->app->dbh;
 
-	if ( $command eq 'setup' ) {
+	if ( $command eq 'rollback' ) {
+		$dbh->begin_work;
+		$dbh->rollback;
+	}
+	elsif ( $command eq 'migrate' ) {
 		$dbh->begin_work;
 		if ( initialize_db($dbh) ) {
 			$dbh->commit;
 		}
 		else {
-			$dbh->rollback;
-		}
-	}
-	elsif ( $command eq 'migrate' ) {
-		$dbh->begin_work;
-		my $schema_version = get_schema_version($dbh);
-		say "Found travelynx schema v${schema_version}";
-		if ( $schema_version == @migrations ) {
-			say "Database layout is up-to-date";
-		}
-		for my $i ( $schema_version .. $#migrations ) {
-			printf( "Updating to v%d ...\n", $i + 1 );
-			if ( not $migrations[$i]() ) {
-				say "Aborting migration; rollback to v${schema_version}";
-				$dbh->rollback;
-				last;
+			my $schema_version = get_schema_version($dbh);
+			say "Found travelynx schema v${schema_version}";
+			if ( $schema_version == @migrations ) {
+				say "Database layout is up-to-date";
 			}
-		}
-		if ( get_schema_version($dbh) == $#migrations ) {
-			$dbh->commit;
+			for my $i ( $schema_version .. $#migrations ) {
+				printf( "Updating to v%d ...\n", $i + 1 );
+				if ( not $migrations[$i]() ) {
+					say "Aborting migration; rollback to v${schema_version}";
+					$dbh->rollback;
+					last;
+				}
+			}
+			if ( get_schema_version($dbh) == $#migrations ) {
+				$dbh->commit;
+			}
 		}
 	}
 	else {
