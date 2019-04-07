@@ -1,7 +1,8 @@
 FROM alpine:3.4
 MAINTAINER Mojolicious
 
-COPY * /
+COPY / /srv/www/travelynx/
+WORKDIR /srv/www/travelynx
 ENV TRAVELYNX_LISTEN=http://127.0.0.1:8093
 ENV TRAVELYNX_IRIS_CACHE=/var/cache/dbf/iris
 ENV TRAVELYNX_IRISRT_CACHE=/var/cache/dbf/iris-rt
@@ -16,4 +17,4 @@ RUN apk update && \
 
 EXPOSE 8093
 
-CMD bash -c "perl index.pl database migrate && hypnotoad -f index.pl"
+CMD sh -c "perl index.pl database migrate && hypnotoad -f index.pl"
